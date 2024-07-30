@@ -1,0 +1,6 @@
+*.png
+__pycache__
+checkpoints*/
+*.pt
+csvs/
+cifar*
