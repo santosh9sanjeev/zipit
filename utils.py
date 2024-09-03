@@ -910,22 +910,60 @@ def prepare_singan(config, device):
 
 def prepare_vgg(config, device):
     """ Load all pretrained vgg models in config. """
-    if 'vgg11' in config['name']:
-        from models.vgg import vgg11 as wrapper_w
-    elif 'vgg16' in config['name']:
-        from models.vgg import vgg16 as wrapper_w
-    else:
-        raise ModuleNotFoundError(config['name'])
     bases = []
     name = config['name']
     if '_w' in name:
         width = int(name.split('_w')[-1])
         name = name.split('_w')[0]
+        print(width, name)
     else:
         width = 1
-    wrapper = lambda num_classes: wrapper_w(width, num_classes)
+
+    print('in vggggggggggggggggg')
+    if 'vgg11' in config['name']:
+        from models.vgg import vgg11 as wrapper_w
+    elif 'vgg16' in config['name']:
+        # from models.vgg import vgg16 as wrapper_w
+        from torchvision.models import vgg16 as wrapper
+    else:
+        raise ModuleNotFoundError(config['name'])
+
+    # wrapper = lambda num_classes: wrapper_w(width, num_classes)
+    # output_dim = config['output_dim']
+
+    # for base_path in tqdm(config['bases'], desc="Preparing Models"):
+    #     base_sd = torch.load(base_path, map_location=torch.device(device))
+    #     breakpoint()
+    #     # Remove module for dataparallel
+    #     for k in list(base_sd.keys()):
+    #         if k.startswith('module.'):
+    #             base_sd[k.replace('module.', '')] = base_sd[k]
+    #             del base_sd[k]
+
+    #     base_model = wrapper(num_classes=output_dim).to(device)
+    #     breakpoint()
+    #     new_base_sd = {}
+    #     for key in base_sd.keys():
+    #         if key.startswith('classifier.0'):
+    #             new_key = key.replace('classifier.0', 'classifier.0', 1)
+    #             new_base_sd[new_key] = base_sd[key]
+    #         elif key.startswith('classifier.3'):
+    #             new_key = key.replace('classifier.3', 'classifier.3', 1)
+    #             new_base_sd[new_key] = base_sd[key]
+    #         elif key.startswith('classifier.6'):
+    #             new_key = key.replace('classifier.6', 'classifier.6', 1)
+    #             new_base_sd[new_key] = base_sd[key]
+
+    #         else:
+    #             new_base_sd[key] = base_sd[key]
+    #     base_model.load_state_dict(new_base_sd)
+    #     bases.append(base_model)
+    # new_model = wrapper(num_classes=output_dim).to(device)
+    # return {
+    #     'bases': bases,
+    #     'new': new_model # this will be the merged model
+    # }
     output_dim = config['output_dim']
-    
     for base_path in tqdm(config['bases'], desc="Preparing Models"):
         base_sd = torch.load(base_path, map_location=torch.device(device))
         
@@ -936,19 +974,17 @@ def prepare_vgg(config, device):
                 del base_sd[k]
 
         base_model = wrapper(num_classes=output_dim).to(device)
-        
         new_base_sd = {}
         for key in base_sd.keys():
             if key.startswith('classifier.0'):
-                new_key = key.replace('classifier.0', 'classifier1', 1)
+                new_key = key.replace('classifier.0', 'classifier.0', 1)
                 new_base_sd[new_key] = base_sd[key]
             elif key.startswith('classifier.3'):
-                new_key = key.replace('classifier.3', 'classifier2', 1)
+                new_key = key.replace('classifier.3', 'classifier.3', 1)
                 new_base_sd[new_key] = base_sd[key]
             elif key.startswith('classifier.6'):
-                new_key = key.replace('classifier.6', 'classifier', 1)
+                new_key = key.replace('classifier.6', 'classifier.6', 1)
                 new_base_sd[new_key] = base_sd[key]
-
             else:
                 new_base_sd[key] = base_sd[key]
         base_model.load_state_dict(new_base_sd)

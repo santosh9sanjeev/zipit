@@ -25,13 +25,10 @@ class VGGGraph(BIGGraph):
                 graph.append(node_insert)
                 graph_idx += 2
         # pdb.set_trace()
-        graph.append('features.' + str(graph_idx)) # AvgPool2d
-        # graph.append(node_insert)
-        graph.append('classifier1') # Linear
-        # graph.append(node_insert)
-        graph.append('classifier2') # Linear        
-        # graph.append(node_insert)
-        graph.append('classifier') # Linear
+        graph.append('avgpool') # AvgPool2d
+        graph.append('classifier.0') # Linear
+        graph.append('classifier.3') # Linear        
+        graph.append('classifier.6') # Linear
         graph.append(NodeType.OUTPUT)
         self.add_nodes_from_sequence('', graph, input_node, sep='')
 

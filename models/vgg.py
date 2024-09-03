@@ -79,7 +79,7 @@ class VGG(nn.Module):
             if x == 'M':
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
             else:
-                layers.append(nn.Conv2d(in_channels if in_channels == 3 else self.w * in_channels,
+                layers.append(nn.Conv2d(in_channels if in_channels == 3 else in_channels,
                                         self.w * x, kernel_size=3, padding=1))
                 layers.append(nn.ReLU(inplace=True))
                 in_channels = x

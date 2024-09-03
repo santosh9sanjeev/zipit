@@ -67,7 +67,7 @@ if __name__ == "__main__":
         'match_tensors_permute',
         'match_tensors_identity',
     ]
-    stop_at = 48
+    stop_at = 47
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     raw_config = get_config_from_name(config_name, device=device)
