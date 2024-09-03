@@ -174,6 +174,8 @@ class BIGGraph(ABC):
                 temp_node = self.create_node(layer_name=name_prefix + f'{sep}{name}')
             else:
                 temp_node = self.create_node(node_type=name)
+            # print(f"{name_prefix}.{name}")
+            # print(f"{source_node} -> {temp_node}")
             self.add_directed_edge(source_node, temp_node)
             source_node = temp_node
         return source_node

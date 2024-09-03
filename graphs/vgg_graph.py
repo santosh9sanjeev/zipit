@@ -26,6 +26,11 @@ class VGGGraph(BIGGraph):
                 graph_idx += 2
         # pdb.set_trace()
         graph.append('features.' + str(graph_idx)) # AvgPool2d
+        # graph.append(node_insert)
+        graph.append('classifier1') # Linear
+        # graph.append(node_insert)
+        graph.append('classifier2') # Linear        
+        # graph.append(node_insert)
         graph.append('classifier') # Linear
         graph.append(NodeType.OUTPUT)
         self.add_nodes_from_sequence('', graph, input_node, sep='')
@@ -42,7 +47,7 @@ def vgg16(model):
     return VGGGraph(model, architecture)
 
 if __name__ == '__main__':
-    sys.path.insert(0, '/nethome/gstoica3/research/ModelMerging/')
+    # sys.path.insert(0, '/nethome/gstoica3/research/ModelMerging/')
     import pdb
     import torch
     from torch.utils.data import TensorDataset, DataLoader
@@ -59,14 +64,14 @@ if __name__ == '__main__':
     dataset = TensorDataset(data_x, data_y)
     dataloader = DataLoader(dataset, batch_size=4)
     
-    model = vgg11_model().eval()
+    model = vgg16_model().eval()
     state_dict = model.state_dict()
 
     print(model)
-    model3 = vgg11_model().eval()
+    model3 = vgg16_model().eval()
     
-    graph1 = vgg11(deepcopy(model)).graphify()
-    graph2 = vgg11(deepcopy(model)).graphify()
+    graph1 = vgg16(deepcopy(model)).graphify()
+    graph2 = vgg16(deepcopy(model)).graphify()
 
     merge = ModelMerge(graph1, graph2)
     merge.transform(model3, dataloader, transform_fn=match_tensors_identity)

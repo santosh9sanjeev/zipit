@@ -112,7 +112,8 @@ def evaluate_pair_models(eval_type, models, config, csv_file, split):
     models = config['models']['bases']
     
     for idx, model in enumerate(models):
-        results = evaluate_model(eval_type, model, config, split)
+        results, model = evaluate_model(eval_type, model, config, split)
+        breakpoint()
         results['Model'] = CONCEPT_TASKS[idx]
         write_to_csv(results, csv_file=csv_file)
         print(results)
@@ -126,7 +127,7 @@ def evaluate_pair_models(eval_type, models, config, csv_file, split):
 
 if __name__ == "__main__":
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    config_name = 'isic2019_resnet50'
+    config_name = 'isic2019_densenet'
     # skip_pair_idxs = [0]
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -135,9 +136,9 @@ if __name__ == "__main__":
     model_name = raw_config['model']['name']
     # run_pairs = find_runable_pairs(model_dir, model_name, skip_pair_idxs=skip_pair_idxs)
     run_pairs = [
-        ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar08_06-17-07_BioMedIA-A5000ResNet50_ImageNet_to_ISIC_FT_No_LP/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar08_04-59-43_BioMedIA-A5000ResNet50_HAM10K_to_ISIC_FT_No_LP/last.ckpt'], #ISIC_FT_NO_LP_ResNet50
-        ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar07_23-52-50_BioMedIA-A5000ResNet50_ImageNet_to_ISIC_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar08_06-18-38_BioMedIA-A5000ResNet50_HAM_to_ISIC_Full_FineTuning/last.ckpt'], #ISIC_Full_finetuning_ResNet50
-        ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar07_23-53-41_BioMedIA-A5000ResNet50_ImageNet_and_HAM_to_ISIC_WeightedKernelAvgModel_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar07_23-53-41_BioMedIA-A5000ResNet50_ImageNet_and_HAM_to_ISIC_WeightedKernelAvgModel_Full_FineTuning/last.ckpt'] #ISIC_Medmerge_ResNet50
+        # ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar08_06-17-07_BioMedIA-A5000ResNet50_ImageNet_to_ISIC_FT_No_LP/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar08_04-59-43_BioMedIA-A5000ResNet50_HAM10K_to_ISIC_FT_No_LP/last.ckpt'], #ISIC_FT_NO_LP_ResNet50
+        # ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar07_23-52-50_BioMedIA-A5000ResNet50_ImageNet_to_ISIC_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar08_06-18-38_BioMedIA-A5000ResNet50_HAM_to_ISIC_Full_FineTuning/last.ckpt'], #ISIC_Full_finetuning_ResNet50
+        # ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar07_23-53-41_BioMedIA-A5000ResNet50_ImageNet_and_HAM_to_ISIC_WeightedKernelAvgModel_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar07_23-53-41_BioMedIA-A5000ResNet50_ImageNet_and_HAM_to_ISIC_WeightedKernelAvgModel_Full_FineTuning/last.ckpt'] #ISIC_Medmerge_ResNet50
         
         # ['/home/santoshsanjeev/MedMerge/logs/train_val/aptos/Mar08_04-36-54_BioMedIA-A5000ResNet50_ImageNet_to_Aptos_FT_No_LP/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/aptos/Mar08_06-13-44_BioMedIA-A5000ResNet50_EyePACS_to_APTOS_my_model_FT_No_LP/last.ckpt'], #APTOS_FT_NO_LP_ResNet50
         # ['/home/santoshsanjeev/MedMerge/logs/train_val/aptos/Mar08_04-46-33_BioMedIA-A5000ResNet50_ImageNet_to_Aptos_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/aptos/Mar08_06-09-48_BioMedIA-A5000ResNet50_EyePACS_to_APTOS_my_model_Full_FineTuning/last.ckpt'] #APTOS_Full_finetuning_ResNet50
@@ -147,17 +148,17 @@ if __name__ == "__main__":
         # ['/home/santoshsanjeev/MedMerge/logs/train_val/rsna/Mar08_06-21-45_BioMedIA-A5000ResNet50_ImageNet_to_RSNA_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/rsna/Mar08_06-22-31_BioMedIA-A5000ResNet50_CheXpert_to_RSNA_Full_FineTuning/last.ckpt'], #RSNA_Full_finetuning_ResNet50
         # ['/home/santoshsanjeev/MedMerge/logs/train_val/rsna/Mar08_07-36-50_BioMedIA-A5000ResNet50_ImageNet_and_CheXpert_to_RSNA_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/rsna/Mar08_07-36-50_BioMedIA-A5000ResNet50_ImageNet_and_CheXpert_to_RSNA_Full_FineTuning/last.ckpt'] #RSNA_medmerge_ResNet50
         
-        ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_09-08-31_BioMedIA-A5000DenseNet121_ImageNet_to_ISIC19_FT_No_LP/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_09-04-03_BioMedIA-A5000DenseNet121_HAM10K_to_ISIC19_FT_No_LP/last.ckpt'],
+        # ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_09-08-31_BioMedIA-A5000DenseNet121_ImageNet_to_ISIC19_FT_No_LP/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_09-04-03_BioMedIA-A5000DenseNet121_HAM10K_to_ISIC19_FT_No_LP/last.ckpt'],
         ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_11-08-48_BioMedIA-A5000DenseNet121_ImageNet_to_ISIC19_Full_FineTuning/last.ckpt','/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_14-51-00_BioMedIA-A5000DenseNet121_HAM10K_to_ISIC19_Full_FineTuning/last.ckpt'],        
-        ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_13-45-10_BioMedIA-A5000DenseNet121_ImageNet_and_HAM10K_to_ISIC19_WeightedKernelAvgModel_Full_FineTuning/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_13-45-10_BioMedIA-A5000DenseNet121_ImageNet_and_HAM10K_to_ISIC19_WeightedKernelAvgModel_Full_FineTuning/last.ckpt']
+        # ['/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_13-45-10_BioMedIA-A5000DenseNet121_ImageNet_and_HAM10K_to_ISIC19_WeightedKernelAvgModel_Full_FineTuning/last.ckpt', '/home/santoshsanjeev/MedMerge/logs/train_val/ISIC19/Mar05_13-45-10_BioMedIA-A5000DenseNet121_ImageNet_and_HAM10K_to_ISIC19_WeightedKernelAvgModel_Full_FineTuning/last.ckpt']
 
-        ['',''],
-        ['',''],
-        ['',''],
+        # ['',''],
+        # ['',''],
+        # ['',''],
 
-        ['',''],
-        ['',''],
-        ['',''],
+        # ['',''],
+        # ['',''],
+        # ['',''],
         ]
 
     csv_file = os.path.join(

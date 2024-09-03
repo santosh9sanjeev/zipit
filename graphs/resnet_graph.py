@@ -121,6 +121,7 @@ if __name__ == '__main__':
     from model_merger import ModelMerge
     from matching_functions import match_tensors_identity, match_tensors_zipit
     from copy import deepcopy
+    import torchvision.models as models
 
     data_x = torch.rand(4, 3, 224, 224)
     data_y = torch.zeros(4)
@@ -128,21 +129,21 @@ if __name__ == '__main__':
     dataset = TensorDataset(data_x, data_y)
     dataloader = DataLoader(dataset, batch_size=4)
 
-    model = resnet2.resnet20().eval()
+    model =  models.resnet50(pretrained=True).eval()
     state_dict = model.state_dict()
 
     print(model)
 
-    model3 = resnet2.resnet20().eval()
+    model3 =  models.resnet50(pretrained=True).eval()
 
-    graph1 = resnet20(deepcopy(model)).graphify()
-    graph2 = resnet20(deepcopy(model)).graphify()
+    graph1 = resnet50(deepcopy(model)).graphify()
+    graph2 = resnet50(deepcopy(model)).graphify()
 
-    # merge = ModelMerge(graph1, graph2)
-    # merge.transform(model3, dataloader, transform_fn=match_tensors_zipit)
+    merge = ModelMerge(graph1, graph2)
+    merge.transform(model3, dataloader, transform_fn=match_tensors_zipit)
 
-    graph1.draw(save_path = 'resnet_a.png',nodes=range(20))
-    graph1.draw(save_path = 'resnet_b.png',nodes=range(len(graph1.G)-20, len(graph1.G)))
+    # graph1.draw(save_path = 'resnet_a.png',nodes=range(20))
+    # graph1.draw(save_path = 'resnet_b.png',nodes=range(len(graph1.G)-20, len(graph1.G)))
 
     print(model.eval().cuda()(data_x.cuda()))
 

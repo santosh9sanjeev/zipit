@@ -6,7 +6,7 @@ config = {
         'name': 'densenet121',                 # name of the model
         'dir': '',              # checkpoint directory where models are stored
         'bases': [],
-        'output_dim':5,                             # list of optional model paths. Empty by default
+        'output_dim':8,                             # list of optional model paths. Empty by default
     },
 
     'merging_fn': 'match_tensors_zipit',        # matching function desired. Please see "matching_functions.py" for a complete list of supported functions.

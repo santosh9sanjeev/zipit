@@ -81,22 +81,17 @@ class MergeHandler:
 
     def handle_conv2d(self, forward, node, module):
         """ Apply (un)merge operation to linear layer parameters. """
-        
         if forward: # unmerge
             try:
-                print('UNMERGE', node, self.merge.shape, module.weight.shape)
                 module.weight.data = torch.einsum('OIHW,IU->OUHW', module.weight, self.unmerge)
             except:
                 pdb.set_trace()
         else: # merge
             try:
-                print('MERGE', node, self.merge.shape, module.weight.shape)
                 module.weight.data = torch.einsum('UO,OIHW->UIHW', self.merge, module.weight)
             except:
-                print('error', node, self.merge.shape, module.weight.shape)
                 pdb.set_trace()
             if hasattr(module, 'bias') and module.bias is not None:
-                
                 module.bias.data = self.merge @ module.bias
     
     def handle_linear(self, forward, node, module):

@@ -578,7 +578,8 @@ def evaluate_logits_i(model, loader, head_index, num_classes, return_confusion=F
                 try:
                     totals[gt] += 1
                 except:
-                    pdb.set_trace()
+                    # pdb.set_trace()
+                    pass
                 
                 if gt == p:
                     correct += 1
@@ -928,14 +929,36 @@ def prepare_vgg(config, device):
     for base_path in tqdm(config['bases'], desc="Preparing Models"):
         base_sd = torch.load(base_path, map_location=torch.device(device))
         
+        # Remove module for dataparallel
+        for k in list(base_sd.keys()):
+            if k.startswith('module.'):
+                base_sd[k.replace('module.', '')] = base_sd[k]
+                del base_sd[k]
+
         base_model = wrapper(num_classes=output_dim).to(device)
-        base_model.load_state_dict(base_sd)
+        
+        new_base_sd = {}
+        for key in base_sd.keys():
+            if key.startswith('classifier.0'):
+                new_key = key.replace('classifier.0', 'classifier1', 1)
+                new_base_sd[new_key] = base_sd[key]
+            elif key.startswith('classifier.3'):
+                new_key = key.replace('classifier.3', 'classifier2', 1)
+                new_base_sd[new_key] = base_sd[key]
+            elif key.startswith('classifier.6'):
+                new_key = key.replace('classifier.6', 'classifier', 1)
+                new_base_sd[new_key] = base_sd[key]
+
+            else:
+                new_base_sd[key] = base_sd[key]
+        base_model.load_state_dict(new_base_sd)
         bases.append(base_model)
     new_model = wrapper(num_classes=output_dim).to(device)
     return {
         'bases': bases,
-        'new': new_model # this will be merged model
+        'new': new_model # this will be the merged model
     }
+
 
 def prepare_models(config, device='cuda'):
     """ Load all pretrained models in config. """
