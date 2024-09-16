@@ -1155,7 +1155,7 @@ def reset_bn_stats(model, loader, reset=True):
 
     if not has_bn:
         return model
-
+    model.half()
     # run a single train epoch with augmentations to recalc stats
     model.train()
     with torch.no_grad(), autocast():

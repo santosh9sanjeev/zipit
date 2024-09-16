@@ -26,8 +26,11 @@ class VGGGraph(BIGGraph):
                 graph_idx += 2
         # pdb.set_trace()
         graph.append('avgpool') # AvgPool2d
+        graph.append(node_insert)
         graph.append('classifier.0') # Linear
+        graph.append(node_insert)
         graph.append('classifier.3') # Linear        
+        graph.append(node_insert)
         graph.append('classifier.6') # Linear
         graph.append(NodeType.OUTPUT)
         self.add_nodes_from_sequence('', graph, input_node, sep='')

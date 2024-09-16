@@ -129,10 +129,21 @@ class MergeHandler:
         if info['type'] in (NodeType.OUTPUT, NodeType.INPUT):
             raise RuntimeError(f'Unexpectedly reached node type {info["type"]} when merging.')
         elif info['type'] == NodeType.CONCAT:
-            # Also this only works if you concat the same size things together
-            merge = self.merge.chunk(len(self.graph.preds(node)), dim=1)
-            for pred, m in zip(self.graph.preds(node), merge):
-                MergeHandler(self.graph, m, self.unmerge).prop_back(pred)
+            pred_shapes = [self.graph.get_node_info(pred)['shape'] for pred in self.graph.preds(node)]
+            
+            # Calculate merge partition sizes based on shapes
+            partition_sizes = [shape[0] for shape in pred_shapes]  # assuming the concatenation is along channel dimension
+            print('booooooooooooo',partition_sizes)
+            splits = torch.split(self.merge, partition_sizes, dim=1)  # split merge based on actual shapes
+            splits_2 = torch.split(self.unmerge, partition_sizes, dim=0)  # split merge based on actual shapes
+            
+            for pred, m, um in zip(self.graph.preds(node), splits, splits_2):
+                MergeHandler(self.graph, m, um).prop_back(pred)
+
+
+            # merge = self.merge.chunk(len(self.graph.preds(node)), dim=1)
+            # for pred, m in zip(self.graph.preds(node), merge):
+            #     MergeHandler(self.graph, m, self.unmerge).prop_back(pred)
         elif info['type'] == NodeType.MODULE:
             module = self.graph.get_module(info['layer'])
             # try:
@@ -166,26 +177,29 @@ class MergeHandler:
             for pred in self.graph.preds(node):
                 self.prop_back(pred)
         elif info['type'] == NodeType.CONCAT:
-            # let's make the assumption that this node is reached in the correct order
+            # Get the number of tensors to concatenate
             num_to_concat = len(self.graph.preds(node))
-
+            print('concatttttttttt', num_to_concat)
             if node not in self.graph.working_info:
                 self.graph.working_info[node] = []
-            self.graph.working_info[node].append(self.unmerge)
             
+            pred_shapes = [self.graph.get_node_info(pred)['shape'] for pred in self.graph.preds(node)]
+            partition_sizes = [shape[0] for shape in pred_shapes]
+            self.graph.working_info[node].append(self.unmerge)
+
             if len(self.graph.working_info[node]) < num_to_concat:
-                # haven't collected all the info yet, don't finish the unmerge
                 self.graph.unmerged.remove(node)
             else:
-                # finally, we're finished
+                print(len(pred_shapes), 'partitionnbbbbbbbbb', partition_sizes)
                 unmerge = torch.block_diag(*self.graph.working_info[node])
                 del self.graph.working_info[node]
 
-                # be free my little unmerge
+                # Apply unmerge transformations based on collected unmerging splits
+                # for pred, unmerge_split in zip(self.graph.preds(node), unmerge_splits):
                 new_handler = MergeHandler(self.graph, self.merge, unmerge)
                 for succ in self.graph.succs(node):
                     new_handler.prop_forward(succ)
-                
+            
 
 
 

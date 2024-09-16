@@ -23,7 +23,10 @@ def run_auxiliary_experiment(merging_fn, experiment_config, pairs, device, split
         train_loader = config['data']['train']['full']
         base_models = [reset_bn_stats(base_model, train_loader) for base_model in config['models']['bases']]
         # base_models = [base_model for base_model in config['models']['bases']]
-
+        # breakpoint()
+        base_models[0] = base_models[0].half()
+        base_models[1] = base_models[1].half()
+        
         Grapher = config['graph']
         graphs = [Grapher(deepcopy(base_model)).graphify() for base_model in base_models]
         Merge = ModelMerge(*graphs, device=device)
@@ -38,13 +41,6 @@ def run_auxiliary_experiment(merging_fn, experiment_config, pairs, device, split
         # Merge.merged_model.classifier.weight = base_models[0].classifier.weight
         # Merge.merged_model.features.norm5 = base_models[0].features.norm5
 
-        print("Do the layer weights match?")
-        for model_layer, merged_layer in zip(base_models[0].named_parameters(), 
-                                             Merge.merged_model.named_parameters()):
-            model_layer_name, model_layer_params = model_layer[0], model_layer[1]
-            print(model_layer_name)
-            print(torch.all(model_layer_params == merged_layer[1]))
-        
         results, model = evaluate_model(experiment_config['eval_type'], Merge, config, split)
         results['Time'] = Merge.compute_transform_time
         results['Merging Fn'] = merging_fn
@@ -63,11 +59,11 @@ if __name__ == "__main__":
     # config_name = 'aptos_densenet'
     skip_pair_idxs = []
     merging_fns = [
-        'match_tensors_zipit',
+        # 'match_tensors_zipit',
         'match_tensors_permute',
         'match_tensors_identity',
     ]
-    stop_at = 47
+    stop_at = None
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     raw_config = get_config_from_name(config_name, device=device)
@@ -100,7 +96,10 @@ if __name__ == "__main__":
         [   '/home/ibrahimalmakky/Documents/projects/MedMerge/logs/train_val/ISIC19/Aug26_15-17-53_BioMedIA-A5000VGG16_ImageNet_to_ISIC19_Full_FineTuning/last.ckpt',
             '/home/ibrahimalmakky/Documents/projects/MedMerge/logs/train_val/ISIC19/Aug26_13-36-10_BioMedIA-A5000VGG16_HAM10K_to_ISIC19_Full_FineTuning/last.ckpt',
         ]
-        ]
+        # [
+        #     '/home/ibrahimalmakky/Documents/projects/MedMerge/logs/train_val/rsna/Sep02_12-58-46_BioMedIA-A5000VGG16_ImageNet_to_RSNA_Full_FineTuning/last.ckpt'
+        # ]
+    ]
         
         #find_runable_pairs(model_dir, model_name, skip_pair_idxs=None)
 
@@ -109,7 +108,7 @@ if __name__ == "__main__":
         raw_config['dataset']['name'],
         raw_config['model']['name'],
         raw_config['eval_type'],
-        'auxiliary_functions_medmerge_vgg.csv'
+        'auxiliary_functions_medmerge_resnet.csv'
     )
     os.makedirs(os.path.dirname(csv_file), exist_ok=True)
     
